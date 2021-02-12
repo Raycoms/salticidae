@@ -208,6 +208,7 @@ void ConnPool::Conn::_recv_data_tls(const conn_t &conn, int fd, int events) {
     {
         if (conn->recv_buffer.len() >= conn->max_recv_buff_size)
         {
+            SALTICIDAE_LOG_DEBUG("Receive buffer overload!!!!!!");
             conn->ev_socket.del();
             conn->ev_socket.add(conn->ready_send ? 0 : FdEvent::WRITE);
             conn->ready_recv = true;
@@ -217,7 +218,7 @@ void ConnPool::Conn::_recv_data_tls(const conn_t &conn, int fd, int events) {
         buff_seg.resize(recv_chunk_size);
         ret = tls->recv(buff_seg.data(), recv_chunk_size);
         SALTICIDAE_LOG_DEBUG("ssl(%d) read %zd bytes", fd, ret);
-        if (ret < 1)
+        if (ret < 0)
         {
             int err = tls->get_error(ret);
             if (err == SSL_ERROR_WANT_READ) break;
