@@ -411,9 +411,9 @@ class TLS {
         return SSL_get_error(ssl, ret);
     }
 
-    int get_read_error(int ret) {
+    int get_write_error(int ret) {
         auto err = SSL_get_error(ssl, ret);;
-        ERR_print_errors(SSL_get_rbio(ssl));
+        ERR_print_errors(SSL_get_wbio(ssl));
         return err;
     }
 
