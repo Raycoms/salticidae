@@ -171,7 +171,7 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
             {
                 /* rewind the whole buff_seg */
                 conn->send_buffer.rewind(std::move(buff_seg));
-                auto err = tls->get_error(ret);
+                int err = tls->get_error(ret);
                 if (ret < 0 && err != SSL_ERROR_WANT_WRITE)
                 {
                     SALTICIDAE_LOG_INFO("send(%d) failure: %s %d", fd, strerror(err), err);
