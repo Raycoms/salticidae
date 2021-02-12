@@ -217,10 +217,11 @@ void ConnPool::Conn::_recv_data_tls(const conn_t &conn, int fd, int events) {
         buff_seg.resize(recv_chunk_size);
         ret = tls->recv(buff_seg.data(), recv_chunk_size);
         SALTICIDAE_LOG_DEBUG("ssl(%d) read %zd bytes", fd, ret);
-        if (ret < 0)
+        if (ret < 1)
         {
-            if (tls->get_error(ret) == SSL_ERROR_WANT_READ) break;
-            SALTICIDAE_LOG_INFO("recv(%d) failure: %s", fd, strerror(errno));
+            int err = tls->get_error(ret);
+            if (err == SSL_ERROR_WANT_READ) break;
+            SALTICIDAE_LOG_INFO("recv(%d) failure: %d %s", fd, err, errno);
             conn->cpool->worker_terminate(conn);
             return;
         }
