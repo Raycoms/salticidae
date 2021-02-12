@@ -32,6 +32,7 @@
 #include <openssl/sha.h>
 #include <openssl/ssl.h>
 #include <openssl/bn.h>
+#include <openssl/err.h>
 
 namespace salticidae {
 
@@ -407,7 +408,9 @@ class TLS {
     }
 
     int get_error(int ret) {
-        return SSL_get_error(ssl, ret);
+        auto code = SSL_get_error(ssl, ret);
+        ERR_print_errors;
+        return code;
     }
 
     void shutdown() { SSL_shutdown(ssl); }
