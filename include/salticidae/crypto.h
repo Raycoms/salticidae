@@ -408,12 +408,8 @@ class TLS {
     }
 
     int get_error(int ret) {
-        return SSL_get_error(ssl, ret);
-    }
-
-    int get_write_error(int ret) {
-        auto err = SSL_get_error(ssl, ret);;
-        ERR_print_errors(SSL_get_wbio(ssl));
+        auto err = SSL_get_error(ssl, ret);
+        ERR_clear_error();
         return err;
     }
 

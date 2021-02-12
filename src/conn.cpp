@@ -174,7 +174,7 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
                 int err = tls->get_write_error(ret);
                 if (ret < 0 && err != SSL_ERROR_WANT_WRITE && err != SSL_ERROR_SSL)
                 {
-                    SALTICIDAE_LOG_INFO("ssl send(%d) failure: %d %s", fd, err, strerror(errno));
+                    SALTICIDAE_LOG_INFO("ssl send(%d) failure: %d %d", fd, err, errno);
                     conn->cpool->worker_terminate(conn);
                     return;
                 }
