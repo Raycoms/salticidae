@@ -408,9 +408,13 @@ class TLS {
     }
 
     int get_error(int ret) {
-        auto code = SSL_get_error(ssl, ret);
-        ERR_print_errors;
-        return code;
+        return SSL_get_error(ssl, ret);
+    }
+
+    int get_read_error(int ret) {
+        auto err = SSL_get_error(ssl, ret);;
+        ERR_print_errors(SSL_get_rbio(ssl));
+        return err;
     }
 
     void shutdown() { SSL_shutdown(ssl); }
