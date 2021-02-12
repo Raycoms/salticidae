@@ -171,17 +171,20 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
             {
                 /* rewind the whole buff_seg */
                 conn->send_buffer.rewind(std::move(buff_seg));
-                if (ret < 0 && tls->get_error(ret) != SSL_ERROR_WANT_WRITE)
+                auto err = tls->get_error(ret);
+                if (ret < 0 && err != SSL_ERROR_WANT_WRITE)
                 {
-                    SALTICIDAE_LOG_INFO("send(%d) failure: %s", fd, strerror(errno));
+                    SALTICIDAE_LOG_INFO("send(%d) failure: %s %d", fd, strerror(err), err);
                     conn->cpool->worker_terminate(conn);
                     return;
                 }
             }
             else
+            {
+                SALTICIDAE_LOG_INFO("partial send succeeded (%d): %d was sent", fd, ret);
                 /* rewind the leftover */
-                conn->send_buffer.rewind(
-                    bytearray_t(buff_seg.begin() + ret, buff_seg.end()));
+                conn->send_buffer.rewind(bytearray_t(buff_seg.begin() + ret, buff_seg.end()));
+            }
             /* wait for the next write callback */
             conn->ready_send = false;
             return;
