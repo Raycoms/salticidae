@@ -143,9 +143,16 @@ class ConnPool {
         /** Write data to the connection (non-blocking). The data will be sent
          * whenever I/O is available. */
         bool write(bytearray_t &&data) {
-            SALTICIDAE_LOG_DEBUG("1write buffer size: %d - %d", send_buffer.size(), data.size());
+            bytearray_t buff_seg = send_buffer.move_pop();
+            SALTICIDAE_LOG_DEBUG("1write buffer size: %d - %d", buff_seg.size(), data.size());
+            send_buffer.rewind(bytearray_t(buff_seg.begin(), buff_seg.end()));
+
             bool push = send_buffer.push(std::move(data), !cpool->max_send_buff_size);
-            SALTICIDAE_LOG_DEBUG("2write buffer size: %d - %d", send_buffer.size(), data.size());
+
+            bytearray_t buff_seg2 = send_buffer.move_pop();
+            SALTICIDAE_LOG_DEBUG("2write buffer size: %d - %d", buff_seg2.size(), data.size());
+            send_buffer.rewind(bytearray_t(buff_seg2.begin(), buff_seg2.end()));
+
             if (!push)
             {
                 SALTICIDAE_LOG_DEBUG("Failed to push data to send buffer!");
@@ -195,9 +202,10 @@ class ConnPool {
         if (conn->worker) conn->worker->unfeed();
         if (conn->tls) conn->tls->shutdown();
         conn->ev_socket.clear();
-        SALTICIDAE_LOG_DEBUG("1Connection teardown %d !", send_bufer.size());
+        bytearray_t buff_seg = conn->send_buffer.move_pop();
+        SALTICIDAE_LOG_DEBUG("1Connection teardown %d !", buff_seg.size());
+        conn->send_buffer.rewind(bytearray_t(buff_seg.begin(), buff_seg.end()));
         conn->send_buffer.get_queue().unreg_handler();
-        SALTICIDAE_LOG_DEBUG("2Connection teardown %d !", send_bufer.size());
     }
     /** Called when the underlying connection breaks. */
     virtual void on_dispatcher_teardown(const conn_t &) {}
