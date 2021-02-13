@@ -161,7 +161,7 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
     for (;;)
     {
         bytearray_t buff_seg = conn->send_buffer.move_pop();
-        SALTICIDAE_LOG_DEBUG("1send buffer size: %d", buff_seg.size());
+        SALTICIDAE_LOG_DEBUG("send buffer size: %d", buff_seg.size());
 
         ssize_t size = buff_seg.size();
         if (!size) break;
