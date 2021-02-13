@@ -165,7 +165,7 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
 
         ssize_t size = buff_seg.size();
         if (!size) break;
-        ret = tls->send(buff_seg.data(), size);
+        ret = tls->send(buff_seg.data(), std::min(buff_seg.size(), conn->recv_chunk_size));
         SALTICIDAE_LOG_DEBUG("ssl(%d) sent %zd bytes", fd, ret);
         size -= ret;
         if (size > 0)
@@ -206,6 +206,7 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
 void ConnPool::Conn::_recv_data_tls(const conn_t &conn, int fd, int events) {
     if (events & FdEvent::ERROR)
     {
+        SALTICIDAE_LOG_DEBUG("Event error, terminating!!!!!!");
         conn->cpool->worker_terminate(conn);
         return;
     }
