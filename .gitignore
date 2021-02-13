@@ -17,3 +17,5 @@ include/salticidae/config.h
 /Makefile
 core
 install_manifest.txt
+
+.idea/
