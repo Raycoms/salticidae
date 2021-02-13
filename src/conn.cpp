@@ -155,14 +155,13 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
         conn->cpool->worker_terminate(conn);
         return;
     }
-    SALTICIDAE_LOG_DEBUG("1send buffer size: %d", send_buffer.size());
 
     ssize_t ret = conn->recv_chunk_size;
     auto &tls = conn->tls;
     for (;;)
     {
         bytearray_t buff_seg = conn->send_buffer.move_pop();
-        SALTICIDAE_LOG_DEBUG("2send buffer size: %d - %d", send_buffer.size(), buff_seg.size());
+        SALTICIDAE_LOG_DEBUG("1send buffer size: %d", buff_seg.s());
 
         ssize_t size = buff_seg.size();
         if (!size) break;
@@ -174,9 +173,7 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
             if (ret < 1) /* nothing is sent */
             {
                 /* rewind the whole buff_seg */
-                SALTICIDAE_LOG_DEBUG("3send buffer size: %d - %d", send_buffer.size(), buff_seg.size());
                 conn->send_buffer.rewind(std::move(buff_seg));
-                SALTICIDAE_LOG_DEBUG("4send buffer size: %d - %d", send_buffer.size(), buff_seg.size());
 
                 int err = tls->get_error(ret);
                 if (ret < 0 && err != SSL_ERROR_WANT_WRITE && err != SSL_ERROR_SSL)
