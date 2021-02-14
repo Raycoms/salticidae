@@ -176,10 +176,6 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
                 conn->send_buffer.rewind(std::move(buff_seg));
 
                 int err = tls->get_error(ret);
-                if (ret == 0)
-                {
-                    SALTICIDAE_LOG_INFO("ssl sent 0");
-                }
                 if (ret < 0 && err != SSL_ERROR_WANT_WRITE && err != SSL_ERROR_SSL)
                 {
                     SALTICIDAE_LOG_INFO("ssl send(%d) failure: %d %d", fd, err, errno);
@@ -189,7 +185,6 @@ void ConnPool::Conn::_send_data_tls(const conn_t &conn, int fd, int events) {
             }
             else
             {
-                SALTICIDAE_LOG_INFO("partial send succeeded (%d): %d was sent", fd, ret);
                 /* rewind the leftover */
                 conn->send_buffer.rewind(bytearray_t(buff_seg.begin() + ret, buff_seg.end()));
             }
